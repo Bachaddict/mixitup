@@ -1,65 +1,77 @@
 using System;
 using System.Collections.Generic;
 
+
 namespace CustomNamespace
 {
     public class CustomClass
     {
         public object Run()
         {
-            // Get the pronouns string
             string pronounsRaw = "$targetuseralejopronouns";
             string targetName = "$targetuserdisplayname";
             string targetUrl = "$targetuserurl";
             string targetGame = "$targetuserstreamgame";
-            
-            // Create a list of pronouns
-            List<string> pronouns = new List<string>();
+            bool isLive = "$targetuserstreamislive" == "True";
 
-            // make pronouns consistent within message
-            if (pronounsRaw == "She/They")
+            // Add new category verbs as desired in the { "category", "verb" }, format
+            var verbDict = new Dictionary<string, string>
             {
-                pronounsRaw = "She/Her";
-            }
-            if (pronounsRaw == "He/They")
-            {
-                pronounsRaw = "He/Him";
-            }
+                { "Art", "making" },
+                { "Special Events", "celebrating" },
+                { "Makers & Crafting", "doing" },
+                { "Lego & Brickbuilding", "doing" },
+                { "Science & Technology", "doing" },
+                { "Travel & Outdoors", "doing" },
+                { "Food & Drink", "making" },
+                { "Just Chatting", "" },
+                { "Software and Game Development", "doing" }
+            };
 
-            // Split the pronouns string at '/' and add both parts to the list in lowercase
-            if (pronounsRaw.Contains("/"))
+            // Map each subject pronoun to a suitable object pronoun
+            var pronounsDict = new Dictionary<string, string>
             {
-                string[] splitPronouns = pronounsRaw.Split('/');
-                pronouns.Add(splitPronouns[0].ToLower());
-                pronouns.Add(splitPronouns[1].ToLower());
-            }
-            else
-            {
-                pronouns.Add("they");
-                pronouns.Add("them");
-            }
+                { "He", "him" },
+                { "She", "her" },
+                { "Xe", "xem" },
+                { "Ze", "zir" },
+                { "Fae", "faer" },
+                { "Ve", "ver" },
+                { "It", "it" },
+                { "Ey", "em" },
+                { "Per", "per" },
+                { "Ae", "aer" },
+                { "E", "em" },
+                { "Zie", "hir" }
+            };
 
+            string subject = pronounsRaw.Split('/')[0];
 
-            // Determine the correct tense based on whether the user is live
-            bool isLive = "$targetuserstreamislive".ToLower() == "true";
+            string subjectPronoun = pronounsDict.ContainsKey(subject)
+                ? subject.ToLower()
+                : "they";
+            string objectPronoun = pronounsDict.ContainsKey(subject)
+                ? pronounsDict[subject]
+                : "them";
+
+            // Use the correct tense - update to taste
             string tense;
-            if (pronouns[0] == "they")
+            if (subjectPronoun == "they")
             {
-                tense = isLive ? "are live now" : "were last";
+                tense = isLive ? "are live RIGHT NOW" : "were last";
             }
             else
             {
-                tense = isLive ? "is live now" : "was last";
+                tense = isLive ? "is live RIGHT NOW" : "was last";
             }
 
-            // Adjust the verb based on the target game
-            string verb = targetGame.ToLower() == "art" ? "doing" : "playing";
+            // Adjust the verb based on the target game - fall back to "playing"
+            string verb = verbDict.ContainsKey(targetGame) ? verbDict[targetGame] : "playing";
 
-            // Construct the message template
             string messageTemplate = "Go follow {0} and show {1} some love at {2} ! {3} {4} {5} {6}.";
 
             // Add arguments to the message template
-            string message = string.Format(messageTemplate, targetName, pronouns[1], targetUrl, pronouns[0], tense, verb, targetGame);
+            string message = string.Format(messageTemplate, targetName, objectPronoun, targetUrl, subjectPronoun, tense, verb, targetGame);
 
             return message;
         }
