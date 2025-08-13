@@ -10,3 +10,5 @@ You will have to install Python to use the python version
 Find me on
 [bsky](https://bsky.app/profile/bachaddict.me)
 [Twitch](https://twitch.tv/bachaddict)
+
+TODO: random pronoun on "Any"
